@@ -92,6 +92,9 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# Attach limiter to app state (required by SlowAPIMiddleware)
+app.state.limiter = limiter
+
 # Add rate limiting middleware
 app.add_middleware(SlowAPIMiddleware)
 
