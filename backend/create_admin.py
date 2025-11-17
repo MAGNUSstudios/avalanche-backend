@@ -1,66 +1,58 @@
 #!/usr/bin/env python3
 """
-Script to create an admin user
-Usage: python create_admin.py
+Create an admin user for the Avalanche platform
 """
 
-from database import SessionLocal, User, init_db
+from database import SessionLocal, Admin, init_db
 from auth import get_password_hash
+from datetime import datetime
 
 def create_admin():
-    """Create an admin user"""
-    # Initialize database
-    init_db()
-    
-    # Admin credentials
-    admin_email = "admin@avalanche.com"
-    admin_password = "admin123"
-    
+    """Create a default admin user"""
     db = SessionLocal()
-    
+
     try:
         # Check if admin already exists
-        existing_admin = db.query(User).filter(User.email == admin_email).first()
-        
+        existing_admin = db.query(Admin).filter(Admin.email == "admin@avalanche.com").first()
+
         if existing_admin:
-            print(f"Admin user already exists: {admin_email}")
-            # Update role to admin if it's not
-            if existing_admin.role != "admin":
-                existing_admin.role = "admin"
-                db.commit()
-                print(f"Updated {admin_email} role to admin")
+            print("✅ Admin user already exists!")
+            print(f"📧 Email: admin@avalanche.com")
+            print(f"👤 Username: {existing_admin.username}")
             return
-        
-        # Create admin user
-        admin_user = User(
-            email=admin_email,
+
+        # Create new admin
+        admin = Admin(
             username="admin",
-            first_name="Admin",
-            last_name="User",
-            country="USA",
-            hashed_password=get_password_hash(admin_password),
-            role="admin",
-            is_active=True
+            email="admin@avalanche.com",
+            hashed_password=get_password_hash("admin123"),
+            is_super_admin=True,
+            created_at=datetime.utcnow(),
+            last_login=None
         )
-        
-        db.add(admin_user)
+
+        db.add(admin)
         db.commit()
-        db.refresh(admin_user)
-        
-        print("=" * 50)
-        print("Admin user created successfully!")
-        print("=" * 50)
-        print(f"Email: {admin_email}")
-        print(f"Password: {admin_password}")
-        print("=" * 50)
-        print("⚠️  Please change the password after first login!")
-        print("=" * 50)
-        
+        db.refresh(admin)
+
+        print("\n" + "="*60)
+        print("✅ Admin user created successfully!")
+        print("="*60)
+        print(f"\n📧 Email: admin@avalanche.com")
+        print(f"🔑 Password: admin123")
+        print(f"👤 Username: admin")
+        print(f"\n🔗 Login at: https://avalanche-frontend-indol.vercel.app/admin/login")
+        print("\n⚠️  IMPORTANT: Change the password after first login!")
+        print("="*60 + "\n")
+
     except Exception as e:
-        print(f"Error creating admin user: {e}")
+        print(f"❌ Error creating admin: {e}")
         db.rollback()
     finally:
         db.close()
 
 if __name__ == "__main__":
+    print("\n🔧 Initializing database...")
+    init_db()
+    print("✅ Database initialized\n")
     create_admin()

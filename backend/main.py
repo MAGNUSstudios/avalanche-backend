@@ -20,7 +20,7 @@ from cloudinary_ai_generator import get_ai_guild_avatar
 
 from database import (
     get_db, init_db, User, Guild, Project, Task, Product, Message, Order, Escrow, Payment, Post,
-    GuildChat, ProjectChat, ProjectChatMessage, guild_members, project_members, SellerPaymentInfo
+    GuildChat, ProjectChat, ProjectChatMessage, guild_members, project_members, SellerPaymentInfo, Admin, SessionLocal
 )
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -197,10 +197,37 @@ def get_random_placeholder_image(category: str = None, image_type: str = "banner
     return picsum_url
 
 
+def create_default_admin():
+    """Create default admin user if it doesn't exist"""
+    db = SessionLocal()
+    try:
+        existing_admin = db.query(Admin).filter(Admin.email == "admin@avalanche.com").first()
+        if not existing_admin:
+            admin = Admin(
+                username="admin",
+                email="admin@avalanche.com",
+                hashed_password=get_password_hash("admin123"),
+                is_super_admin=True,
+                created_at=datetime.utcnow(),
+                last_login=None
+            )
+            db.add(admin)
+            db.commit()
+            print("✅ Default admin user created (admin@avalanche.com / admin123)")
+        else:
+            print("✅ Admin user already exists")
+    except Exception as e:
+        print(f"⚠️  Error creating admin: {e}")
+        db.rollback()
+    finally:
+        db.close()
+
+
 @app.on_event("startup")
 async def startup_event():
     """Initialize database on startup"""
     init_db()
+    create_default_admin()
     qdrant_service.init_qdrant_clients() # Initialize Qdrant and OpenAI clients
     qdrant_service.initialize_collections() # Ensure collections exist
     print("✅ Database initialized")
