@@ -59,14 +59,8 @@ import guild_chat_routes
 import project_chat
 import cart_checkout
 import seller_payment_routes
-try:
-    import qdrant_service
-except ImportError:
-    qdrant_service = None
-try:
-    import ai_recommendations
-except ImportError:
-    ai_recommendations = None
+import qdrant_service
+import ai_recommendations
 import ai_assistant
 import ai_actions
 import user_settings_routes
