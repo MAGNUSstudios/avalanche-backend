@@ -6,6 +6,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 import os
+import hashlib
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -30,18 +31,23 @@ class TokenData(BaseModel):
     email: Optional[str] = None
 
 
+def _prehash_password(password: str) -> str:
+    """Pre-hash password with SHA-256 to ensure it's under bcrypt's 72-byte limit"""
+    return hashlib.sha256(password.encode('utf-8')).hexdigest()
+
+
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verify a password against its hash - truncate to 72 bytes for bcrypt"""
-    # Bcrypt has a 72-byte limit, truncate if necessary
-    password_bytes = plain_password.encode('utf-8')[:72]
-    return pwd_context.verify(password_bytes.decode('utf-8', errors='ignore'), hashed_password)
+    """Verify a password against its hash"""
+    # Pre-hash the password to ensure it's under bcrypt's 72-byte limit
+    prehashed = _prehash_password(plain_password)
+    return pwd_context.verify(prehashed, hashed_password)
 
 
 def get_password_hash(password: str) -> str:
-    """Hash a password - truncate to 72 bytes for bcrypt"""
-    # Bcrypt has a 72-byte limit, truncate if necessary
-    password_bytes = password.encode('utf-8')[:72]
-    return pwd_context.hash(password_bytes.decode('utf-8', errors='ignore'))
+    """Hash a password using SHA-256 pre-hashing + bcrypt"""
+    # Pre-hash the password to ensure it's under bcrypt's 72-byte limit
+    prehashed = _prehash_password(password)
+    return pwd_context.hash(prehashed)
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
