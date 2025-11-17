@@ -105,12 +105,13 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 # Support multiple frontend URLs (comma-separated in env var)
 allowed_origins = [origin.strip() for origin in FRONTEND_URL.split(",")]
-# Add localhost for development
+# Add localhost for development and production frontend
 allowed_origins.extend([
     "http://localhost:5173",
     "http://localhost:5174",
     "http://localhost:5175",
-    "http://localhost:5176"
+    "http://localhost:5176",
+    "https://avalanche-frontend-indol.vercel.app"
 ])
 # Remove duplicates
 allowed_origins = list(set(allowed_origins))
