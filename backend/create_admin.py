@@ -25,8 +25,12 @@ def create_admin():
         admin = Admin(
             username="admin",
             email="admin@avalanche.com",
+            first_name="Admin",
+            last_name="User",
             hashed_password=get_password_hash("admin123"),
-            is_super_admin=True,
+            is_active=True,
+            ai_tier="admin",
+            plan_selected=True,
             created_at=datetime.utcnow(),
             last_login=None
         )
