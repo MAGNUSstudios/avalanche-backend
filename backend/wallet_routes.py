@@ -6,6 +6,7 @@ import json
 import schemas
 from bank_schemas import BankAccountCreate
 import auth
+import database
 from database import Wallet, WalletTransaction, WithdrawalRequest, User
 
 router = APIRouter(
