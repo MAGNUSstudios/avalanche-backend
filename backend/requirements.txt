@@ -18,3 +18,4 @@ stripe==11.2.0
 slowapi==0.1.9
 bleach==6.2.0
 qdrant-client==1.12.1
+tiktoken==0.8.0
